@@ -9,13 +9,19 @@ from utils import save_uploaded_file
 
 from config import APP_NAME
 
-# Page config
+# =========================
+# Page Config
+# =========================
+
 st.set_page_config(
     page_title="Advanced RAG Chatbot",
     layout="wide"
 )
 
+# =========================
 # Load CSS
+# =========================
+
 with open("styles.css") as f:
 
     st.markdown(
@@ -23,7 +29,10 @@ with open("styles.css") as f:
         unsafe_allow_html=True
     )
 
+# =========================
 # Sidebar
+# =========================
+
 with st.sidebar:
 
     st.title("📂 Upload Documents")
@@ -47,21 +56,32 @@ with st.sidebar:
         "Upload multiple documents and chat with them."
     )
 
-# Main title
+# =========================
+# Main Title
+# =========================
+
 st.title(APP_NAME)
 
 st.markdown(
-    "### Advanced Multi-Document RAG System"
+    "### Multi-Document AI Assistant "
 )
 
-# Session state
+# =========================
+# Session State
+# =========================
+
 if "messages" not in st.session_state:
+
     st.session_state.messages = []
 
 if "retriever" not in st.session_state:
+
     st.session_state.retriever = None
 
-# Process files
+# =========================
+# Process Documents
+# =========================
+
 if uploaded_files:
 
     file_paths = []
@@ -74,26 +94,40 @@ if uploaded_files:
 
         file_paths.append(file_path)
 
-    with st.spinner("Processing documents..."):
+    with st.spinner(
+        "Processing documents..."
+    ):
 
         st.session_state.retriever = (
             process_documents(file_paths)
         )
 
-    st.success("Documents processed successfully!")
+    st.success(
+        "Documents processed successfully!"
+    )
 
-# Display history
+# =========================
+# Display Chat History
+# =========================
+
 for msg in st.session_state.messages:
 
     with st.chat_message(msg["role"]):
+
         st.write(msg["content"])
 
-# Chat input
+# =========================
+# Chat Input
+# =========================
+
 question = st.chat_input(
     "Ask questions about your documents..."
 )
 
-# Ask question
+# =========================
+# Ask Question
+# =========================
+
 if question and st.session_state.retriever:
 
     st.session_state.messages.append(
@@ -104,6 +138,7 @@ if question and st.session_state.retriever:
     )
 
     with st.chat_message("user"):
+
         st.write(question)
 
     with st.spinner("Thinking..."):
@@ -132,8 +167,11 @@ if question and st.session_state.retriever:
     )
 
     with st.chat_message("assistant"):
+
         st.write(final_response)
 
 elif question and not st.session_state.retriever:
 
-    st.warning("Please upload documents first.")
+    st.warning(
+        "Please upload documents first."
+    )

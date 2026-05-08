@@ -1,8 +1,6 @@
 APP_NAME = "📄 Advanced AI Assistant"
 
-MODEL_NAME = "llama3"
-
-EMBEDDING_MODEL = "nomic-embed-text"
+MODEL_NAME = "llama-3.3-70b-versatile"
 
 CHUNK_SIZE = 700
 

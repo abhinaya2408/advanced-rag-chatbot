@@ -1,34 +1,51 @@
 import os
 
+from dotenv import load_dotenv
+
 from langchain_text_splitters import (
     RecursiveCharacterTextSplitter
 )
 
 from langchain_community.vectorstores import FAISS
 
-from langchain_ollama import (
-    OllamaEmbeddings,
-    ChatOllama
+from langchain_groq import ChatGroq
+
+from langchain_community.embeddings import (
+    HuggingFaceEmbeddings
 )
 
 from loaders import load_document
 
 from config import (
     MODEL_NAME,
-    EMBEDDING_MODEL,
     CHUNK_SIZE,
     CHUNK_OVERLAP,
     TOP_K_RESULTS
 )
 
-# Models
-llm = ChatOllama(model=MODEL_NAME)
+# Load env variables
+load_dotenv()
 
-embeddings = OllamaEmbeddings(
-    model=EMBEDDING_MODEL
+# =========================
+# LLM
+# =========================
+
+llm = ChatGroq(
+    model_name=MODEL_NAME
 )
 
-# Process documents
+# =========================
+# Embeddings
+# =========================
+
+embeddings = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
+
+# =========================
+# Process Documents
+# =========================
+
 def process_documents(file_paths):
 
     all_docs = []
@@ -38,17 +55,24 @@ def process_documents(file_paths):
         documents = load_document(file_path)
 
         for doc in documents:
-            doc.metadata["source"] = os.path.basename(file_path)
+
+            doc.metadata["source"] = (
+                os.path.basename(file_path)
+            )
 
         all_docs.extend(documents)
 
-    # Split text
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=CHUNK_SIZE,
-        chunk_overlap=CHUNK_OVERLAP
+    # Text splitter
+    text_splitter = (
+        RecursiveCharacterTextSplitter(
+            chunk_size=CHUNK_SIZE,
+            chunk_overlap=CHUNK_OVERLAP
+        )
     )
 
-    docs = text_splitter.split_documents(all_docs)
+    docs = text_splitter.split_documents(
+        all_docs
+    )
 
     # Vector DB
     vectorstore = FAISS.from_documents(
@@ -60,44 +84,58 @@ def process_documents(file_paths):
     vectorstore.save_local("vectorstore")
 
     retriever = vectorstore.as_retriever(
-        search_kwargs={"k": TOP_K_RESULTS}
+        search_kwargs={
+            "k": TOP_K_RESULTS
+        }
     )
 
     return retriever
 
-# Ask questions
+# =========================
+# Ask Questions
+# =========================
+
 def ask_documents(question, retriever):
 
-    retrieved_docs = retriever.invoke(question)
+    retrieved_docs = retriever.invoke(
+        question
+    )
 
     context = "\n\n".join(
-        [doc.page_content for doc in retrieved_docs]
+        [
+            doc.page_content
+            for doc in retrieved_docs
+        ]
     )
 
     sources = list(
         set(
             [
-                doc.metadata.get("source", "Unknown")
+                doc.metadata.get(
+                    "source",
+                    "Unknown"
+                )
                 for doc in retrieved_docs
             ]
         )
     )
 
     prompt = f"""
-    You are an intelligent AI assistant.
+You are an intelligent AI assistant.
 
-    Use ONLY the provided context.
+Use ONLY the provided context.
 
-    If information is not available,
-    say:
-    'The information is not available in the uploaded documents.'
+If information is not available,
+say:
 
-    Context:
-    {context}
+'The information is not available in the uploaded documents.'
 
-    Question:
-    {question}
-    """
+Context:
+{context}
+
+Question:
+{question}
+"""
 
     response = llm.invoke(prompt)
 

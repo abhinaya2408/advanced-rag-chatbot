@@ -1,1 +1,14 @@
-pip freeze > requirements.txt
+streamlit
+langchain
+langchain-community
+langchain-groq
+sentence-transformers
+faiss-cpu
+python-dotenv
+tiktoken
+pypdf
+docx2txt
+unstructured
+python-pptx
+beautifulsoup4
+lxml
