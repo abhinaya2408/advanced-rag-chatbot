@@ -3,8 +3,7 @@ from langchain_community.document_loaders import (
     TextLoader,
     CSVLoader,
     BSHTMLLoader,
-    Docx2txtLoader,
-    UnstructuredPowerPointLoader
+    Docx2txtLoader
 )
 
 def load_document(file_path):
@@ -24,10 +23,9 @@ def load_document(file_path):
     elif file_path.endswith(".docx"):
         loader = Docx2txtLoader(file_path)
 
-    elif file_path.endswith(".pptx"):
-        loader = UnstructuredPowerPointLoader(file_path)
-
     else:
-        raise ValueError("Unsupported file format")
+        raise ValueError(
+            "Unsupported file format"
+        )
 
     return loader.load()

@@ -10,8 +10,6 @@ python-dotenv
 tiktoken
 pypdf
 docx2txt
-unstructured
-python-pptx
 beautifulsoup4
 lxml
 torch
