@@ -95,12 +95,18 @@ def process_documents(file_paths):
 # Ask Questions
 # =========================
 
+# =========================
+# Ask Questions
+# =========================
+
 def ask_documents(question, retriever):
 
+    # Retrieve relevant docs
     retrieved_docs = retriever.invoke(
         question
     )
 
+    # Context
     context = "\n\n".join(
         [
             doc.page_content
@@ -108,18 +114,22 @@ def ask_documents(question, retriever):
         ]
     )
 
-    sources = list(
-        set(
-            [
-                doc.metadata.get(
-                    "source",
-                    "Unknown"
-                )
-                for doc in retrieved_docs
-            ]
-        )
+    # Best matching document
+    best_doc = retrieved_docs[0]
+
+    # Source filename
+    best_source = best_doc.metadata.get(
+        "source",
+        "Unknown"
     )
 
+    # Page number
+    page_number = best_doc.metadata.get(
+        "page",
+        "N/A"
+    )
+
+    # Prompt
     prompt = f"""
 You are an intelligent AI assistant.
 
@@ -137,9 +147,11 @@ Question:
 {question}
 """
 
+    # LLM response
     response = llm.invoke(prompt)
 
     return {
         "answer": response.content,
-        "sources": sources
+        "source": best_source,
+        "page": page_number
     }

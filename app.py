@@ -150,14 +150,19 @@ if question and st.session_state.retriever:
 
     answer = result["answer"]
 
-    sources = result["sources"]
+    source = result["source"]
+
+    page = result["page"]
 
     final_response = f"""
-{answer}
+    {answer}
 
-📚 Sources:
-{', '.join(sources)}
-"""
+    📚 Source:
+    {source}
+
+    📄 Page:
+    {page}
+    """
 
     st.session_state.messages.append(
         {
